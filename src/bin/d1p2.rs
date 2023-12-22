@@ -17,10 +17,6 @@ fn calc(input: String) -> i32 {
     numeric_words.insert("eight", 8);
     numeric_words.insert("nine", 9);
 
-    // let mut numeric_words = vec![
-    //     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    // ];
-
     let mut sum = 0;
 
     for (_i, line) in input.lines().enumerate() {
@@ -30,9 +26,14 @@ fn calc(input: String) -> i32 {
             if let Some(i) = line.find(word) {
                 map.insert(i, *digit as i32);
             }
+            // Took an embarrassingly long time to figure out that not having this part is what was
+            // causing me to fail
+            if let Some(i) = line.rfind(word) {
+                map.insert(i, *digit as i32);
+            }
         }
 
-        if let Some(i_first_digit) = line.find(|c: char| c.is_numeric()) {
+        if let Some(i_first_digit) = line.find(char::is_numeric) {
             map.insert(
                 i_first_digit,
                 line.chars()
@@ -43,7 +44,7 @@ fn calc(input: String) -> i32 {
             );
         }
 
-        if let Some(i_last_digit) = line.rfind(|c: char| c.is_numeric()) {
+        if let Some(i_last_digit) = line.rfind(char::is_numeric) {
             map.insert(
                 i_last_digit,
                 line.chars()
@@ -53,7 +54,6 @@ fn calc(input: String) -> i32 {
                     .unwrap() as i32,
             );
         }
-
 
         let first_num = map.get(map.keys().min().unwrap()).unwrap();
         let last_num = map.get(map.keys().max().unwrap()).unwrap();
@@ -120,4 +120,18 @@ mod tests {
         assert_eq!(calc("thoneree".to_string()), 11)
     }
 
+    #[test]
+    fn oneight() {
+        assert_eq!(calc("oneight".to_string()), 18)
+    }
+
+    #[test]
+    fn failing_case() {
+        assert_eq!(calc("ninezfcrvxfnjd6nine".to_string()), 99)
+    }
+
+    #[test]
+    fn example() {
+        assert_eq!(calc("two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen".to_string()), 281)
+    }
 }
